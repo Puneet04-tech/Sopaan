@@ -1,0 +1,60 @@
+{
+  "warning": "DEV ONLY — generated for the Sopaan prototype. Never ship these seeds. Rotate before any pilot.",
+  "generated_at": "2026-11-03T16:35:27.595Z",
+  "keys": {
+    "root": {
+      "seed": "472c84b1eef942c5e48d61d5d093143dee6f4005835e303b60b3285fbc81174a",
+      "publicKey": "aWl7BZ6I6NxGpQLD8NJySRqSPlqpomA1bDPbIdIRNno",
+      "privateKey": "RyyEse75QsXkjWHV0JMUPe5vQAWDXjA7YLMoX7yBF0o",
+      "kid": "e2w9WZQqPPM"
+    },
+    "pack": {
+      "seed": "2d3743b4a95d54141f3a1543786dd7ed7d23cb827ba169c92f3df21cd947b67c",
+      "publicKey": "_Fqx2TRnXHFLHVbqTZUSmgFAgbiBvgD-HjDqPZjX-yY",
+      "privateKey": "LTdDtKldVBQfOhVDeG3X7X0jy4J7oWnJLz3yHNlHtnw",
+      "kid": "3QH_0RkZOJw"
+    },
+    "registry": {
+      "seed": "3f448e63f62b0c5128cf855bb85b8f9e6ccb35dabe6f7006dea84b36134f239a",
+      "publicKey": "wzwihW13t2ogoLdPXqy1LFCkdc-vXL-1AdIAE6KEhc0",
+      "privateKey": "P0SOY_YrDFEoz4VbuFuPnmzLNdq-b3AG3qhLNhNPI5o",
+      "kid": "XfIhlFZdOZ8"
+    },
+    "issuer-hub-1": {
+      "seed": "47a95dbec056c04721f361fd4fbf6a253bf45616e01a5fcb50d6a69f7fd4530f",
+      "publicKey": "LKFGQoFKZmtvGiJkHGw1tLsV0iwVy2vhRVcyPy-svKs",
+      "privateKey": "R6ldvsBWwEch82H9T79qJTv0VhbgGl_LUNamn3_UUw8",
+      "kid": "L1IBI7f7x0g"
+    },
+    "issuer-hub-2": {
+      "seed": "4f69c6dc597f89c6029f00a544d9f93a126f37e7966a1ccce60b200d920d2165",
+      "publicKey": "QUk0HTmc_cTIFSJdnG52I9BGV3Ko2spUxMHGmsEzVeo",
+      "privateKey": "T2nG3Fl_icYCnwClRNn5OhJvN-eWahzM5gsgDZINIWU",
+      "kid": "onmiNMsXnhs"
+    },
+    "reviewer-1": {
+      "seed": "9658710b6f861aba50f1a3b11a3f72a8a9195e4376a9d8881b86d7b409743155",
+      "publicKey": "RG1Zz5FMbMeKi2XckpFL_oGDFEXLx9JWITOsdLFO7Fc",
+      "privateKey": "llhxC2-GGrpQ8aOxGj9yqKkZXkN2qdiIG4bXtAl0MVU",
+      "kid": "kvY6Qp0UcTw"
+    },
+    "reviewer-2": {
+      "seed": "0a1749b2317dde45722c66d2ab6656557766851052b0b2dd299e4d862dff071c",
+      "publicKey": "n3UJCeeLThW54cMX2TDOrkIBLOtYvn4qW2evnRN7sOY",
+      "privateKey": "ChdJsjF93kVyLGbSq2ZWVXdmhRBSsLLdKZ5Nhi3_Bxw",
+      "kid": "GWvAn6sDaQE"
+    },
+    "reviewer-3": {
+      "seed": "5193be38ac1a65e943d24df0659ab2ac0dde7a81cdf7e3dcdc7b3ffe3c4d6fab",
+      "publicKey": "YAl2icphI45LJQCyf_5QcNT_S-duK3iYjeHde0mnSKU",
+      "privateKey": "UZO-OKwaZelD0k3wZZqyrA3eeoHN9-Pc3Hs__jxNb6s",
+      "kid": "Y_dQzyR62z8"
+    },
+    "sponsor": {
+      "seed": "7491ca7bee0f11aa7dd9ea2af8d88e459ea5a95d7777ccc4e199e550b0e7d324",
+      "publicKey": "tm-KibayXO_dPnv1EXmomYPzmo_1OD6QhvDZyeYs-4Y",
+      "privateKey": "dJHKe-4PEap92eoq-NiORZ6lqV13d8zE4ZnlULDn0yQ",
+      "kid": "JSlWKQ7mQV0"
+    }
+  }
+}

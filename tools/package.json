@@ -1,0 +1,17 @@
+{
+  "name": "@sopaan/tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Key generation, signed pack builder and standalone verifier for Sopaan artifacts.",
+  "scripts": {
+    "keys": "node gen-keys.mjs",
+    "packs": "node build-packs.mjs",
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^2.3.0",
+    "@noble/hashes": "^1.8.0",
+    "json-logic-js": "^2.0.5"
+  }
+}

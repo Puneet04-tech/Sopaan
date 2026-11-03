@@ -48,3 +48,7 @@ ai/.cache/
 *.pem
 *.key
 !tools/dev-keys.json
+
+# --- Generated copies (rebuild with: npm run packs) ---
+web/public/packs/
+web/src/generated/

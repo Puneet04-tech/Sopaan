@@ -1,0 +1,42 @@
+{
+  "note": "Public trust anchors for the Sopaan demo. Replace with production keys.",
+  "root_kid": "e2w9WZQqPPM",
+  "keys": {
+    "e2w9WZQqPPM": {
+      "role": "root",
+      "public_key": "aWl7BZ6I6NxGpQLD8NJySRqSPlqpomA1bDPbIdIRNno"
+    },
+    "3QH_0RkZOJw": {
+      "role": "pack",
+      "public_key": "_Fqx2TRnXHFLHVbqTZUSmgFAgbiBvgD-HjDqPZjX-yY"
+    },
+    "XfIhlFZdOZ8": {
+      "role": "registry",
+      "public_key": "wzwihW13t2ogoLdPXqy1LFCkdc-vXL-1AdIAE6KEhc0"
+    },
+    "L1IBI7f7x0g": {
+      "role": "issuer-hub-1",
+      "public_key": "LKFGQoFKZmtvGiJkHGw1tLsV0iwVy2vhRVcyPy-svKs"
+    },
+    "onmiNMsXnhs": {
+      "role": "issuer-hub-2",
+      "public_key": "QUk0HTmc_cTIFSJdnG52I9BGV3Ko2spUxMHGmsEzVeo"
+    },
+    "kvY6Qp0UcTw": {
+      "role": "reviewer-1",
+      "public_key": "RG1Zz5FMbMeKi2XckpFL_oGDFEXLx9JWITOsdLFO7Fc"
+    },
+    "GWvAn6sDaQE": {
+      "role": "reviewer-2",
+      "public_key": "n3UJCeeLThW54cMX2TDOrkIBLOtYvn4qW2evnRN7sOY"
+    },
+    "Y_dQzyR62z8": {
+      "role": "reviewer-3",
+      "public_key": "YAl2icphI45LJQCyf_5QcNT_S-duK3iYjeHde0mnSKU"
+    },
+    "JSlWKQ7mQV0": {
+      "role": "sponsor",
+      "public_key": "tm-KibayXO_dPnv1EXmomYPzmo_1OD6QhvDZyeYs-4Y"
+    }
+  }
+}

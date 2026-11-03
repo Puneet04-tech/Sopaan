@@ -1,0 +1,1878 @@
+{
+  "pack_version": "2026.10.14-1",
+  "cases": [
+    {
+      "scheme_id": "PMS-OBC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "OBC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "OBC",
+        "family_income": 180000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "PMS-OBC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "OBC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "SC",
+        "family_income": 180000
+      },
+      "confidence": {},
+      "expect": "NOT:c2"
+    },
+    {
+      "scheme_id": "PMS-OBC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "OBC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "OBC",
+        "family_income": 300000
+      },
+      "confidence": {},
+      "expect": "NOT:c3"
+    },
+    {
+      "scheme_id": "PMS-OBC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "OBC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {},
+      "confidence": {},
+      "expect": "NEED:[category,class_level,family_income]"
+    },
+    {
+      "scheme_id": "PMS-SC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "SC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 12,
+        "category": "SC",
+        "family_income": 120000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "PMS-SC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "SC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 12,
+        "category": "OBC",
+        "family_income": 120000
+      },
+      "confidence": {},
+      "expect": "NOT:c2"
+    },
+    {
+      "scheme_id": "PMS-SC-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "SC"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 12,
+        "category": "SC"
+      },
+      "confidence": {},
+      "expect": "NEED:[family_income]"
+    },
+    {
+      "scheme_id": "PMS-ST-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "ST"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "ST",
+        "family_income": 90000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "PMS-ST-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "ST"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "ST",
+        "family_income": 400000
+      },
+      "confidence": {},
+      "expect": "NOT:c3"
+    },
+    {
+      "scheme_id": "PMS-ST-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "==": [
+                {
+                  "var": "category"
+                },
+                "ST"
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "ST"
+      },
+      "confidence": {},
+      "expect": "NEED:[family_income]"
+    },
+    {
+      "scheme_id": "VJNT-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "category"
+                },
+                [
+                  "VJNT",
+                  "NT"
+                ]
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "VJNT",
+        "family_income": 200000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "VJNT-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "category"
+                },
+                [
+                  "VJNT",
+                  "NT"
+                ]
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "NT",
+        "family_income": 200000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "VJNT-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "category"
+                },
+                [
+                  "VJNT",
+                  "NT"
+                ]
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "category": "OPEN",
+        "family_income": 200000
+      },
+      "confidence": {},
+      "expect": "NOT:c2"
+    },
+    {
+      "scheme_id": "VJNT-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "category"
+                },
+                [
+                  "VJNT",
+                  "NT"
+                ]
+              ]
+            },
+            "needs": [
+              "category"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11
+      },
+      "confidence": {},
+      "expect": "NEED:[category,family_income]"
+    },
+    {
+      "scheme_id": "EBC-GIRLS-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "gender"
+                },
+                "female"
+              ]
+            },
+            "needs": [
+              "gender"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                100000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "gender": "female",
+        "class_level": 11,
+        "family_income": 90000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "EBC-GIRLS-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "gender"
+                },
+                "female"
+              ]
+            },
+            "needs": [
+              "gender"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                100000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "gender": "male",
+        "class_level": 11,
+        "family_income": 90000
+      },
+      "confidence": {},
+      "expect": "NOT:c1"
+    },
+    {
+      "scheme_id": "EBC-GIRLS-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "gender"
+                },
+                "female"
+              ]
+            },
+            "needs": [
+              "gender"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                100000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "gender": "female",
+        "class_level": 11,
+        "family_income": 150000
+      },
+      "confidence": {},
+      "expect": "NOT:c3"
+    },
+    {
+      "scheme_id": "EBC-GIRLS-MH",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "gender"
+                },
+                "female"
+              ]
+            },
+            "needs": [
+              "gender"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                100000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11
+      },
+      "confidence": {},
+      "expect": "NEED:[family_income,gender]"
+    },
+    {
+      "scheme_id": "MINORITY-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "minority"
+                },
+                true
+              ]
+            },
+            "needs": [
+              "minority"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                200000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          },
+          {
+            "id": "c4",
+            "logic": {
+              ">=": [
+                {
+                  "var": "marks_percent"
+                },
+                50
+              ]
+            },
+            "needs": [
+              "marks_percent"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "minority": true,
+        "class_level": 11,
+        "family_income": 150000,
+        "marks_percent": 72
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "MINORITY-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "minority"
+                },
+                true
+              ]
+            },
+            "needs": [
+              "minority"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                200000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          },
+          {
+            "id": "c4",
+            "logic": {
+              ">=": [
+                {
+                  "var": "marks_percent"
+                },
+                50
+              ]
+            },
+            "needs": [
+              "marks_percent"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "minority": true,
+        "class_level": 11,
+        "family_income": 150000,
+        "marks_percent": 40
+      },
+      "confidence": {},
+      "expect": "NOT:c4"
+    },
+    {
+      "scheme_id": "MINORITY-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "minority"
+                },
+                true
+              ]
+            },
+            "needs": [
+              "minority"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                11
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                200000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          },
+          {
+            "id": "c4",
+            "logic": {
+              ">=": [
+                {
+                  "var": "marks_percent"
+                },
+                50
+              ]
+            },
+            "needs": [
+              "marks_percent"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 11,
+        "family_income": 150000
+      },
+      "confidence": {},
+      "expect": "NEED:[marks_percent,minority]"
+    },
+    {
+      "scheme_id": "PWD-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "disability"
+                },
+                true
+              ]
+            },
+            "needs": [
+              "disability"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                9
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "disability": true,
+        "class_level": 9,
+        "family_income": 200000
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "PWD-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "disability"
+                },
+                true
+              ]
+            },
+            "needs": [
+              "disability"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                9
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "disability": false,
+        "class_level": 9,
+        "family_income": 200000
+      },
+      "confidence": {},
+      "expect": "NOT:c1"
+    },
+    {
+      "scheme_id": "PWD-PMS",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "==": [
+                {
+                  "var": "disability"
+                },
+                true
+              ]
+            },
+            "needs": [
+              "disability"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                9
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c3",
+            "logic": {
+              "<=": [
+                {
+                  "var": "family_income"
+                },
+                250000
+              ]
+            },
+            "needs": [
+              "family_income"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 9
+      },
+      "confidence": {},
+      "expect": "NEED:[disability,family_income]"
+    },
+    {
+      "scheme_id": "ITI-APPRENTICE",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "age"
+                },
+                14
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12",
+                  "ITI"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "age": 17,
+        "education_level": "CLASS_10"
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "ITI-APPRENTICE",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "age"
+                },
+                14
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12",
+                  "ITI"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "age": 13,
+        "education_level": "CLASS_10"
+      },
+      "confidence": {},
+      "expect": "NOT:c1"
+    },
+    {
+      "scheme_id": "ITI-APPRENTICE",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "age"
+                },
+                14
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12",
+                  "ITI"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "age": 17
+      },
+      "confidence": {},
+      "expect": "NEED:[education_level]"
+    },
+    {
+      "scheme_id": "PMKVY-SHORT",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "and": [
+                {
+                  ">=": [
+                    {
+                      "var": "age"
+                    },
+                    15
+                  ]
+                },
+                {
+                  "<=": [
+                    {
+                      "var": "age"
+                    },
+                    45
+                  ]
+                }
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "age": 20,
+        "education_level": "CLASS_10"
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "PMKVY-SHORT",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "and": [
+                {
+                  ">=": [
+                    {
+                      "var": "age"
+                    },
+                    15
+                  ]
+                },
+                {
+                  "<=": [
+                    {
+                      "var": "age"
+                    },
+                    45
+                  ]
+                }
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "age": 50,
+        "education_level": "CLASS_10"
+      },
+      "confidence": {},
+      "expect": "NOT:c1"
+    },
+    {
+      "scheme_id": "PMKVY-SHORT",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "and": [
+                {
+                  ">=": [
+                    {
+                      "var": "age"
+                    },
+                    15
+                  ]
+                },
+                {
+                  "<=": [
+                    {
+                      "var": "age"
+                    },
+                    45
+                  ]
+                }
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "age": 20,
+        "education_level": "NONE"
+      },
+      "confidence": {},
+      "expect": "NOT:c2"
+    },
+    {
+      "scheme_id": "PMKVY-SHORT",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              "and": [
+                {
+                  ">=": [
+                    {
+                      "var": "age"
+                    },
+                    15
+                  ]
+                },
+                {
+                  "<=": [
+                    {
+                      "var": "age"
+                    },
+                    45
+                  ]
+                }
+              ]
+            },
+            "needs": [
+              "age"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              "in": [
+                {
+                  "var": "education_level"
+                },
+                [
+                  "CLASS_8",
+                  "CLASS_10",
+                  "CLASS_12"
+                ]
+              ]
+            },
+            "needs": [
+              "education_level"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "education_level": "CLASS_10"
+      },
+      "confidence": {},
+      "expect": "NEED:[age]"
+    },
+    {
+      "scheme_id": "POLY-DIPLOMA",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                10
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "marks_percent"
+                },
+                35
+              ]
+            },
+            "needs": [
+              "marks_percent"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 10,
+        "marks_percent": 68
+      },
+      "confidence": {},
+      "expect": "ELIGIBLE"
+    },
+    {
+      "scheme_id": "POLY-DIPLOMA",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                10
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "marks_percent"
+                },
+                35
+              ]
+            },
+            "needs": [
+              "marks_percent"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 10,
+        "marks_percent": 30
+      },
+      "confidence": {},
+      "expect": "NOT:c2"
+    },
+    {
+      "scheme_id": "POLY-DIPLOMA",
+      "criteria": {
+        "all": [
+          {
+            "id": "c1",
+            "logic": {
+              ">=": [
+                {
+                  "var": "class_level"
+                },
+                10
+              ]
+            },
+            "needs": [
+              "class_level"
+            ]
+          },
+          {
+            "id": "c2",
+            "logic": {
+              ">=": [
+                {
+                  "var": "marks_percent"
+                },
+                35
+              ]
+            },
+            "needs": [
+              "marks_percent"
+            ]
+          }
+        ]
+      },
+      "profile": {
+        "class_level": 10
+      },
+      "confidence": {},
+      "expect": "NEED:[marks_percent]"
+    }
+  ]
+}
