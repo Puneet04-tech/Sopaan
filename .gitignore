@@ -1,0 +1,50 @@
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- Agent runtime ---
+.freebuff/
+.tmp_docs/
+
+# --- Node ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+coverage/
+playwright-report/
+test-results/
+
+# --- Java / Maven ---
+target/
+*.class
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Local data / dev servers ---
+*.db
+*.mv.db
+*.trace.db
+data/
+server/data/
+ai/.cache/
+
+# --- Secrets (never commit a real key) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!tools/dev-keys.json
