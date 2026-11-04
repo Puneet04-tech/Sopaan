@@ -18,7 +18,6 @@
 | GET | `/v1/meta` | profile, demo flag, pack/registry pointers, issuer count, credential stats |
 | GET | `/actuator/health` | liveness |
 | POST | `/v1/devices:enroll` | register a device public key, receive a JWT |
-| GET | `/v1/packs`, `/v1/packs/{file}` | signed pack artifacts |
 | GET | `/v1/registry/snapshot` | signed issuer/revocation snapshot |
 | GET | `/v1/credentials/{credId}` | signed credential envelope (QR verifiers may fetch) |
 
