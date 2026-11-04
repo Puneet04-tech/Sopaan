@@ -16,8 +16,11 @@ import type { Lang } from "./i18n";
 import { t } from "./i18n";
 
 export type SyncPhase = "idle" | "syncing" | "ok" | "offline" | "error";
+export type Theme = "dark" | "light";
 
 export const lang = signal<Lang>("hi");
+export const theme = signal<Theme>("dark");
+export const landingSeen = signal(false);
 export const route = signal<string>("/");
 export const ready = signal(false);
 export const bootError = signal<string | null>(null);
@@ -57,6 +60,28 @@ export function notify(text: string, tone: "good" | "warn" | "bad" = "good"): vo
   }, 3800);
 }
 
+export function applyTheme(next: Theme): void {
+  theme.value = next;
+  document.documentElement.dataset.theme = next;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "dark" ? "#12111f" : "#f7f1e7");
+  try {
+    localStorage.setItem("sopaan_theme", next);
+  } catch {
+    // Private mode can refuse storage; the in-memory theme still applies.
+  }
+}
+
+export async function setTheme(next: Theme): Promise<void> {
+  applyTheme(next);
+  await setSetting("theme", next);
+}
+
+export async function enterApp(path = "/"): Promise<void> {
+  landingSeen.value = true;
+  await setSetting("landing_seen", true);
+  navigate(path);
+}
+
 export function navigate(path: string): void {
   if (window.location.hash !== `#${path}`) window.location.hash = path;
   route.value = path;
@@ -80,6 +105,8 @@ export async function bootstrap(): Promise<void> {
     identity.value = id;
     const storedLang = await getSetting<Lang>("language", "hi");
     lang.value = storedLang;
+    applyTheme(await getSetting<Theme>("theme", "dark"));
+    landingSeen.value = await getSetting("landing_seen", false);
 
     const artifacts = await ensureArtifacts();
     pack.value = artifacts.pack;

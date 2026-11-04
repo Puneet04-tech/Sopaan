@@ -1,6 +1,6 @@
 import type { ComponentChildren, JSX } from "preact";
 import { freshness, type Freshness } from "../core/format";
-import { pendingSync, pack } from "../state";
+import { pendingSync, pack, setTheme, theme } from "../state";
 
 const paths: Record<string, JSX.Element> = {
   home: <><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /></>,
@@ -31,6 +31,9 @@ const paths: Record<string, JSX.Element> = {
   copy: <><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></>,
   building: <><path d="M4 21V5l8-2v18" /><path d="M12 21h8V9l-8-2" /><path d="M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2" /></>,
   heart: <path d="M12 20s-7-4.5-7-9.5A4 4 0 0 1 12 7a4 4 0 0 1 7 3.5C19 15.5 12 20 12 20z" />,
+  sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" /></>,
+  moon: <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4 8.4 8.4 0 1 0 20 14.2z" />,
+  steps: <><path d="M4 20h4v-4h4v-4h4V8h4" /><path d="M4 20V10M8 16V6" /></>,
 };
 
 export function Icon({ name, size = 20 }: { name: keyof typeof paths | string; size?: number }) {
@@ -144,6 +147,22 @@ export function FreshnessChip() {
 export function FreshBadge({ value }: { value: Freshness }) {
   const tone = value.tone === "good" ? "good" : value.tone === "warn" ? "warn" : "info";
   return <Badge tone={tone}>{value.label}</Badge>;
+}
+
+export function ThemeToggle({ compact = false }: { compact?: boolean }) {
+  const current = theme.value;
+  const next = current === "dark" ? "light" : "dark";
+  return (
+    <button
+      class={`icon-btn theme-toggle ${compact ? "compact" : ""}`}
+      onClick={() => void setTheme(next)}
+      title={`Switch to ${next} theme`}
+      aria-label={`Switch to ${next} theme`}
+      aria-pressed={current === "dark"}
+    >
+      <Icon name={current === "dark" ? "sun" : "moon"} size={17} />
+    </button>
+  );
 }
 
 export function Empty({ text, icon = "spark" }: { text: string; icon?: string }) {

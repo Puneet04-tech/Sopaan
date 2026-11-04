@@ -18,7 +18,8 @@ import { Sponsor } from "./features/Sponsor";
 import { Settings } from "./features/Settings";
 import { More } from "./features/More";
 import { Tour } from "./features/Tour";
-import { bootError, ready, route } from "./state";
+import { Landing } from "./features/Landing";
+import { bootError, landingSeen, ready, route } from "./state";
 
 export function App() {
   useEffect(() => {
@@ -35,7 +36,7 @@ export function App() {
       <div class="app">
         <div class="screen" style="padding-top:80px">
           <div class="center">
-            <div style="width:56px;height:56px;border-radius:16px;background:var(--ink);display:grid;place-items:center;margin:0 auto 14px;color:#fff">
+            <div class="boot-mark">
               <Icon name="lock" size={26} />
             </div>
             <h1>SOPAAN</h1>
@@ -69,6 +70,9 @@ export function App() {
   const segments = route.value.split("?")[0].split("/").filter(Boolean);
   const head = segments[0] ?? "";
   const param = segments[1];
+
+  // First visit opens the story before the tool. Deep links still go straight to their screen.
+  if (head === "welcome" || (head === "" && !landingSeen.value)) return <Landing />;
 
   let screen = <Home />;
   switch (head) {

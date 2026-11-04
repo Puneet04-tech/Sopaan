@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#1c1b3a" />
+    <meta name="theme-color" content="#12111f" />
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("sopaan_theme") === "light" ? "light" : "dark";
+      } catch (error) {
+        document.documentElement.dataset.theme = "dark";
+      }
+    </script>
     <meta
       name="description"
       content="Sopaan turns a rural student's spoken goal into a verified next step, portable proof of skills and funding that follows proof — offline."

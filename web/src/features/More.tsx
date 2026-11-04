@@ -33,6 +33,7 @@ const GROUPS = [
       { path: "/sync", icon: "sync", hi: "सिंक और पैक", en: "Sync and packs" },
       { path: "/settings", icon: "settings", hi: "सेटिंग्स और गोपनीयता", en: "Settings and privacy" },
       { path: "/tour", icon: "spark", hi: "डेमो यात्रा", en: "Demo tour" },
+      { path: "/welcome", icon: "book", hi: "सोपान के बारे में", en: "About Sopaan" },
     ],
   },
 ];

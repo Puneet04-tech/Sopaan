@@ -3,7 +3,7 @@ import { db, ensureIdentity, getSetting, resetLocalData, setSetting, type Device
 import { installedPacks, rollbackPack, BUNDLED_PACK } from "../data/packs";
 import { verifyPack } from "../core/envelope";
 import { formatDate } from "../core/format";
-import { refreshLocal, lang, setLanguage, notify } from "../state";
+import { refreshLocal, lang, setLanguage, notify, setTheme, theme } from "../state";
 import { Badge, Icon, PageHead } from "../components/ui";
 
 export function Settings() {
@@ -49,6 +49,24 @@ export function Settings() {
           "Pseudonymous identity, versioned consent, and an age on every result.",
         )}
       />
+
+      <section class="card" style="margin-bottom:12px">
+        <h3>{L("रूप", "Appearance")}</h3>
+        <div class="segmented mt-2">
+          <button aria-pressed={theme.value === "dark"} onClick={() => void setTheme("dark")}>
+            {L("रात", "Night")}
+          </button>
+          <button aria-pressed={theme.value === "light"} onClick={() => void setTheme("light")}>
+            {L("दिन", "Daylight")}
+          </button>
+        </div>
+        <p class="tiny muted mt-2">
+          {L(
+            "रात डिफ़ॉल्ट है; चुनाव इस फ़ोन पर याद रहता है।",
+            "Night is the default; the choice is remembered on this phone.",
+          )}
+        </p>
+      </section>
 
       <section class="card" style="margin-bottom:12px">
         <h3>{L("भाषा", "Language")}</h3>

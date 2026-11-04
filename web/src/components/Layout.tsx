@@ -2,7 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useMemo } from "preact/hooks";
 import { lang, navigate, online, outbox, route, setLanguage, toast } from "../state";
 import { t, type Lang } from "../i18n";
-import { Icon } from "./ui";
+import { Icon, ThemeToggle } from "./ui";
 
 const NAV = [
   { path: "/", icon: "home", key: "nav.home" },
@@ -12,11 +12,8 @@ const NAV = [
   { path: "/more", icon: "settings", key: "nav.more" },
 ];
 
-const LANGS: { id: Lang; label: string }[] = [
-  { id: "hi", label: "हि" },
-  { id: "mr", label: "मरा" },
-  { id: "en", label: "En" },
-];
+const LANG_LABEL: Record<Lang, string> = { hi: "हिं", mr: "मरा", en: "EN" };
+const NEXT_LANG: Record<Lang, Lang> = { hi: "en", en: "mr", mr: "hi" };
 
 function BrandMark() {
   return (
@@ -65,18 +62,15 @@ export function Layout({ children }: { children: ComponentChildren }) {
           {networkLabel}
           {pending > 0 ? ` · ${pending}` : ""}
         </span>
-        <div class="lang-switch" role="group" aria-label={t("common.language", language)}>
-          {LANGS.map((entry) => (
-            <button
-              key={entry.id}
-              aria-pressed={language === entry.id}
-              onClick={() => setLanguage(entry.id)}
-              title={entry.id}
-            >
-              {entry.label}
-            </button>
-          ))}
-        </div>
+        <ThemeToggle compact />
+        <button
+          class="icon-btn lang-cycle"
+          onClick={() => setLanguage(NEXT_LANG[language])}
+          title={`${t("common.language", language)}: ${LANG_LABEL[NEXT_LANG[language]]}`}
+          aria-label={`${t("common.language", language)}: ${LANG_LABEL[language]}`}
+        >
+          {LANG_LABEL[language]}
+        </button>
       </div>
 
       {!online.value && pending > 0 ? (
