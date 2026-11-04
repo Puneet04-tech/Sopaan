@@ -6,7 +6,8 @@ import { dirname, join } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const cwd = join(here, "..", "server");
 const windows = process.platform === "win32";
-const command = windows ? "mvnw.cmd" : "./mvnw";
+// Use the absolute wrapper path: cmd.exe does not reliably resolve "mvnw.cmd" from cwd.
+const command = join(cwd, windows ? "mvnw.cmd" : "mvnw");
 const result = spawnSync(command, process.argv.slice(2), {
   cwd,
   stdio: "inherit",
