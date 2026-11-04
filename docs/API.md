@@ -73,8 +73,8 @@ POST /v1/credentials            # roles: FACILITATOR, HUB, ADMIN
 {"subject_id":"stu-radha","skill":"tailoring","level":2,"evidence_label":"Assessor observed 3 garments","issuer_kid":"issuer-hub-1"}
 ```
 
-Returns `{cred_id, envelope, status: "ISSUED"}`. The envelope is Ed25519-signed by the leased issuer
-key and includes the registry epoch.
+Returns `{credential, envelope}`. The credential payload carries its `cred_id`, issuer, subject,
+skill, level and registry epoch; the envelope is Ed25519-signed by the leased issuer key.
 
 ```http
 POST /v1/credentials/{credId}:revoke     # FACILITATOR, ADMIN
