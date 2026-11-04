@@ -1,0 +1,1 @@
+"""Sopaan optional AI sidecar."""
