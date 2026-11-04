@@ -58,8 +58,9 @@ npm run dev:server       # http://localhost:8080
 # 3. Optional AI sidecar (deterministic fallbacks without a key)
 npm run dev:ai           # http://localhost:8000
 
-# 4. Everything in one command (hub profile, as a facilitator would run it)
+# 4. Everything in one command
 docker compose up --build
+# PWA http://localhost:8088 · API http://localhost:8080 · AI http://localhost:8000
 ```
 
 Open the PWA, tap **Demo tour** and follow Radha's eight steps. Turn the network off (DevTools →

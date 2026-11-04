@@ -12,10 +12,10 @@ its own.
 | 4 | PWA shell + design system | `web/src/{app,styles,components}` | Installable, shell + core pack under the 2 MB target, i18n (hi/en/mr) |
 | 5 | Five-link UI | `web/src/features/*` | Discover → Plan → Act → Prove → Release all work offline |
 | 6 | Sync engine + transports | cloud, file, QR adapters | Idempotent push, high-water prune, pull + atomic pack swap |
-| 7 | Spring Boot cloud + hub | `server/` | Same jar, two profiles; all §5.2.2 endpoints; golden parity |
-| 8 | FastAPI sidecar | `ai/` | Four endpoints + fairness CLI; deterministic fallback when no LLM key |
+| 7 | Spring Boot cloud + hub | `server/` | Same jar, two profiles; all §5.2.2 endpoints; golden parity — 27/27 e2e checks, 6 JUnit tests |
+| 8 | FastAPI sidecar | `ai/` | Four endpoints + fairness CLI; deterministic fallback when no LLM key — 8 pytest checks |
 | 9 | Reviewer + sponsor + hub UI | `web/src/features/{Reviewer,Hub,Sponsor}` | 2-of-3 co-sign gate, aggregate-only sponsor view |
-| 10 | Delivery | Docker Compose, CI, docs, demo | `docker compose up`, CI green, 8-step demo rehearsed |
+| 10 | Delivery | Docker Compose, CI, docs, demo | Compose config validated (image build not run here: Docker engine was stopped); CI workflow provided; 8-step demo script |
 
 ## Deliberate deviations (and why)
 
