@@ -236,6 +236,36 @@ for (const scheme of baseSchemes) {
 mkdirSync(join(out, "vectors"), { recursive: true });
 writeFileSync(join(out, "vectors", "eligibility.json"), `${JSON.stringify(vectors, null, 2)}\n`);
 
+// Negative fixtures: a correctly signed pack whose manifest no longer matches its
+// sections, and one with a flipped signature byte. Tests must reject both.
+mkdirSync(join(out, "vectors"), { recursive: true });
+const currentEnvelope = JSON.parse(readFileSync(join(packDir, `${current.version}.json`), "utf8"));
+const tamperedPayload = JSON.parse(Buffer.from(currentEnvelope.payload, "base64url").toString("utf8"));
+tamperedPayload.schemes[0].deadline = "2099-12-31";
+const tamperedSection = signEnvelope({
+  privateKey: K.pack.privateKey,
+  publicKey: K.pack.publicKey,
+  typ: "pack",
+  payload: tamperedPayload,
+});
+writeFileSync(join(out, "vectors", "tampered-section.json"), `${JSON.stringify(tamperedSection, null, 2)}\n`);
+const badSignature = clone(currentEnvelope);
+const sigBytes = Buffer.from(badSignature.sig, "base64url");
+sigBytes[0] ^= 0xff;
+badSignature.sig = sigBytes.toString("base64url");
+writeFileSync(join(out, "vectors", "tampered-signature.json"), `${JSON.stringify(badSignature, null, 2)}\n`);
+
+for (const [name, expectedError] of [
+  ["tampered-section.json", "section_hash_mismatch:schemes"],
+  ["tampered-signature.json", "bad_signature"],
+]) {
+  const envelope = JSON.parse(readFileSync(join(out, "vectors", name), "utf8"));
+  const result = verifyPack(envelope, { [K.pack.kid]: K.pack.publicKey });
+  if (result.ok || !result.errors.includes(expectedError)) {
+    failures.push(`${name}: expected rejection with ${expectedError}, got ${result.errors.join(",") || "accepted"}`);
+  }
+}
+
 // Copy public artifacts to the PWA and the Spring static resources.
 const webPacks = join(root, "web", "public", "packs");
 rmSync(webPacks, { recursive: true, force: true });
@@ -247,6 +277,29 @@ for (const rel of ["latest.json", "registry/registry-3.json", ...built.map((b) =
   mkdirSync(dirname(dest), { recursive: true });
   copyFileSync(join(out, rel), dest);
 }
+
+// Baked-in first-run artifacts so the PWA works offline immediately after install.
+copyFileSync(join(packDir, `${current.version}.json`), join(root, "web", "src", "generated", "demo-pack.json"));
+copyFileSync(join(out, "registry", "registry-3.json"), join(root, "web", "src", "generated", "demo-registry.json"));
+writeFileSync(
+  join(root, "web", "src", "generated", "demo-keys.json"),
+  `${JSON.stringify(
+    {
+      warning: "DEV ONLY. Published demo keys for the facilitator hub and the simulated sponsor. Never use these in production.",
+      issuer: {
+        ...K["issuer-hub-1"],
+        org: "Zilla Parishad Skills Cell (demo)",
+        scope: ["TAILOR.L1", "TAILOR.L2", "WELD.L1"],
+        epoch: 3,
+        valid_from: "2026-01-01",
+        valid_to: "2026-12-31",
+      },
+      sponsor: { ...K.sponsor, org: "CSR Skills Fund (demo)" },
+    },
+    null,
+    2,
+  )}\n`,
+);
 
 if (failures.length > 0) {
   console.error("Pack build failed:");

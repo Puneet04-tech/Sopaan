@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/sopaan}
+    username: ${DATABASE_USER:sopaan}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+sopaan:
+  profile: cloud
+  demo-mode: ${SOPAAN_DEMO_MODE:false}

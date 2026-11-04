@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: sopaan
+  datasource:
+    url: jdbc:h2:file:./data/sopaan;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+sopaan:
+  profile: cloud
+  packs-dir: ../packs
+  keys-file: ../tools/dev-keys.json
+  demo-mode: true
+  jwt-secret: ${SOPAAN_JWT_SECRET:dev-only-secret-change-me-please-32}
+  jwt-ttl-seconds: 3600
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    root: INFO
+    com.sopaan: INFO
