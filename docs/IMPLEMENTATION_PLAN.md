@@ -15,7 +15,7 @@ its own.
 | 7 | Spring Boot cloud + hub | `server/` | Same jar, two profiles; all §5.2.2 endpoints; golden parity — 27/27 e2e checks, 6 JUnit tests |
 | 8 | FastAPI sidecar | `ai/` | Four endpoints + fairness CLI; deterministic fallback when no LLM key — 8 pytest checks |
 | 9 | Reviewer + sponsor + hub UI | `web/src/features/{Reviewer,Hub,Sponsor}` | 2-of-3 co-sign gate, aggregate-only sponsor view |
-| 10 | Delivery | Docker Compose, CI, docs, demo | Compose config validated (image build not run here: Docker engine was stopped); CI workflow provided; 8-step demo script |
+| 10 | Delivery | CI, docs, demo | CI workflow provided; 8-step demo script; the three processes run from source |
 
 ## Deliberate deviations (and why)
 
@@ -25,7 +25,7 @@ its own.
 | Neon Postgres in cloud | H2 by default, Postgres profile provided | Keeps the demo runnable with no account. Same Flyway migrations, `postgres` profile in `application-cloud.yml`. |
 | LLM for rule extraction | Deterministic extractor + optional OpenAI-compatible adapter | Works with no key; the output is always `PROPOSED` and cannot be published without 2-of-3 signatures. |
 | ArcUnit dependency rules | Package structure + explicit module boundaries | Same intent, one less dependency on the free tier. |
-| Render deploys | Docker Compose + a Render blueprint | Deploying is the user's decision; the blueprint is checked in, not executed. |
+| Container-based delivery | Direct Node/JDK/Python processes | Keeps the documented path to one that was actually run and verified on this machine. |
 
 ## Targets vs results
 

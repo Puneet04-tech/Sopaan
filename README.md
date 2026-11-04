@@ -57,11 +57,10 @@ npm run dev:server       # http://localhost:8080
 
 # 3. Optional AI sidecar (deterministic fallbacks without a key)
 npm run dev:ai           # http://localhost:8000
-
-# 4. Everything in one command
-docker compose up --build
-# PWA http://localhost:8088 · API http://localhost:8080 · AI http://localhost:8000
 ```
+
+Run those three in separate terminals. There is no container packaging: the supported path is
+Node, JDK 17 and Python on the machine.
 
 Open the PWA, tap **Demo tour** and follow Radha's eight steps. Turn the network off (DevTools →
 Network → Offline, or airplane mode) before step 4: the chain keeps working from the cached pack.

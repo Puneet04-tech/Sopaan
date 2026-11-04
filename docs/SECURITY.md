@@ -46,8 +46,8 @@ live eligibility or payment system.
 - **AI.** Stateless, loopback-bound, no profile text sent to a model. `SOPAAN_AI_PROVIDER` defaults
   to deterministic. No API key is ever shipped to the browser.
 - **Demo mode.** Role escalation and the cohort-ownership bypass exist only when
-  `sopaan.demo-mode=true`, and every use writes `demo.role` / demo audit entries. `render.yaml` sets
-  it to `false`.
+  `sopaan.demo-mode=true`, and every use writes `demo.role` / demo audit entries. The `cloud` profile
+  defaults it to `false`; keep `SOPAAN_DEMO_MODE=false` in any shared environment.
 
 ## Known gaps (deliberate, documented)
 

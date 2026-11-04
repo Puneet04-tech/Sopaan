@@ -108,8 +108,10 @@ rather than silently granting eligibility to everyone.
 - default (`application.yml`): H2 file for a zero-setup demo, demo mode on.
 - `cloud` (`application-cloud.yml`): Postgres from `DATABASE_URL`, public listener, demo mode off by
   default, `SOPAAN_JWT_SECRET` required in practice.
-- `docker compose up` runs the PWA (nginx), the API and the sidecar. `render.yaml` is a blueprint,
-  not an executed deployment.
+
+The three processes run directly from source (`npm run dev:web`, `npm run dev:server`,
+`npm run dev:ai`). No container packaging is included; a managed host should build the PWA assets
+and run the Spring jar and FastAPI app as separate services.
 
 ## 7. Failure behaviour
 
