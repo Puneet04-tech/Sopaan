@@ -15,14 +15,16 @@ public class ReviewController {
         this.reviews = reviews;
     }
 
-    public record ApproveRequest(String reviewer_kid) {
+    @PostMapping("/v1/admin/rules/{packId}:approve")
+    public Map<String, Object> approve(HttpServletRequest request, @PathVariable String packId) {
+        Auth.require(request, "REVIEWER", "ADMIN");
+        return reviews.approve(packId, Auth.subject(request), Auth.subject(request));
     }
 
-    @PostMapping("/v1/admin/rules/{packId}:approve")
-    public Map<String, Object> approve(HttpServletRequest request, @PathVariable String packId, @RequestBody(required = false) ApproveRequest body) {
-        Auth.require(request, "REVIEWER", "ADMIN");
-        String reviewer = body == null || body.reviewer_kid() == null ? "reviewer-1" : body.reviewer_kid();
-        return reviews.approve(packId, reviewer, Auth.subject(request));
+    @GetMapping("/v1/admin/rules/{packId}/signatures")
+    public Map<String, Object> signatures(HttpServletRequest request, @PathVariable String packId) {
+        Auth.require(request, "REVIEWER", "ADMIN", "FACILITATOR");
+        return reviews.signatures(packId);
     }
 
     @GetMapping("/v1/admin/rules/{packId}/golden")

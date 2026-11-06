@@ -28,6 +28,12 @@ public class CohortController {
         return cohorts.create(Auth.subject(request), body.name(), body.district());
     }
 
+    @GetMapping("/v1/cohorts")
+    public Map<String, Object> mine(HttpServletRequest request) {
+        Auth.require(request, "FACILITATOR", "ADMIN");
+        return cohorts.mine(Auth.subject(request), "ADMIN".equals(Auth.role(request)));
+    }
+
     @PostMapping("/v1/cohorts/{cohortId}/members")
     public Map<String, Object> addMember(HttpServletRequest request, @PathVariable String cohortId, @Valid @RequestBody MemberRequest body) {
         Auth.require(request, "FACILITATOR", "ADMIN");

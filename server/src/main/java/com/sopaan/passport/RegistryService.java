@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.sopaan.common.CanonicalJson;
 import com.sopaan.common.Envelope;
-import com.sopaan.config.KeyStore;
+import com.sopaan.common.KeyStore;
 import com.sopaan.rules.PackService;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;

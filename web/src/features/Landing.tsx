@@ -78,6 +78,8 @@ export function Landing() {
           <a href="#chain">How it works</a>
           <a href="#roles">Who it serves</a>
         </nav>
+        <a class="btn ghost small" href="#/login">Login</a>
+        <a class="btn saffron small" href="#/register">Sign up</a>
         <ThemeToggle compact />
         <button class="btn saffron small landing-enter" onClick={() => void enterApp("/")}>
           Open app <Icon name="arrow" size={15} />
@@ -106,6 +108,28 @@ export function Landing() {
               <button class="btn secondary" onClick={() => void enterApp("/tour")}>
                 Walk Radha’s 8 steps
               </button>
+            </div>
+            <div class="auth-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px">
+              <a class="card" href="#/login" style="text-decoration:none">
+                <div class="row-between">
+                  <div>
+                    <div class="eyebrow">Already have account</div>
+                    <h3 style="margin:4px 0 0">Login</h3>
+                    <p class="muted" style="margin:6px 0 0">Sign in to continue your journey</p>
+                  </div>
+                  <span class="badge info">→</span>
+                </div>
+              </a>
+              <a class="card" href="#/register" style="text-decoration:none">
+                <div class="row-between">
+                  <div>
+                    <div class="eyebrow">New to Sopaan</div>
+                    <h3 style="margin:4px 0 0">Sign up</h3>
+                    <p class="muted" style="margin:6px 0 0">Create your account as a student</p>
+                  </div>
+                  <span class="badge good">→</span>
+                </div>
+              </a>
             </div>
             <p class="hero-fine">
               No sign-up. Demo keys and simulated credits are labelled throughout.
@@ -262,6 +286,8 @@ export function Landing() {
       <footer class="landing-footer">
         <span>SOPAAN · हर कदम, प्रमाणित</span>
         <span>Demo build · dev keys · simulated credits</span>
+        <a class="link-btn" href="#/login">Login</a>
+        <a class="link-btn" href="#/register">Sign up</a>
         <button class="link-btn" onClick={() => void enterApp("/")}>
           {landingSeen.value ? "Open app" : "Enter app"}
         </button>

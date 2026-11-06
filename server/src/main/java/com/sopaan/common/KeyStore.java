@@ -1,4 +1,4 @@
-package com.sopaan.config;
+package com.sopaan.common;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

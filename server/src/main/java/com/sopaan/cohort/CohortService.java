@@ -39,6 +39,14 @@ public class CohortService {
         return Map.of("cohort_id", cohortId, "name", name, "district", district == null ? "" : district);
     }
 
+    /** Cohorts this facilitator owns. An ADMIN sees all of them. */
+    public Map<String, Object> mine(String actor, boolean admin) {
+        List<Map<String, Object>> rows = admin
+                ? jdbc.queryForList("SELECT cohort_id, facilitator_id, name, district, created_at FROM cohort ORDER BY created_at DESC")
+                : jdbc.queryForList("SELECT cohort_id, facilitator_id, name, district, created_at FROM cohort WHERE facilitator_id = ? ORDER BY created_at DESC", actor);
+        return Map.of("cohorts", rows);
+    }
+
     @Transactional
     public Map<String, Object> addMember(String facilitatorId, String cohortId, String studentId) {
         Map<String, Object> cohort = cohort(cohortId);

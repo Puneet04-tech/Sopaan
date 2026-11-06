@@ -6,7 +6,7 @@ import com.sopaan.common.ApiException;
 import com.sopaan.common.CanonicalJson;
 import com.sopaan.common.Envelope;
 import com.sopaan.common.Ids;
-import com.sopaan.config.KeyStore;
+import com.sopaan.common.KeyStore;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +42,17 @@ public class CredentialService {
         if (cert == null) throw new ApiException(400, "issuer_not_registered");
         boolean scoped = cert.scope().stream().anyMatch(scope -> skill.equals(scope) || skill.startsWith(scope + "."));
         if (!scoped) throw new ApiException(403, "skill_outside_issuer_scope");
+
+        // A key can only sign inside its lease window; an expired lease must be renewed at sync
+        // rather than quietly kept alive (design D6, "bound the blast radius").
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (cert.validFrom() != null && cert.validTo() != null) {
+            java.time.LocalDate from = java.time.LocalDate.parse(cert.validFrom());
+            java.time.LocalDate to = java.time.LocalDate.parse(cert.validTo());
+            if (today.isBefore(from) || today.isAfter(to)) {
+                throw new ApiException(403, "issuer_lease_expired");
+            }
+        }
 
         long now = Instant.now().getEpochSecond();
         long expires = Instant.now().plus(365, ChronoUnit.DAYS).getEpochSecond();

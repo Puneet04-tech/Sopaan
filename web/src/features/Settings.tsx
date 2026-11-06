@@ -3,7 +3,11 @@ import { db, ensureIdentity, getSetting, resetLocalData, setSetting, type Device
 import { installedPacks, rollbackPack, BUNDLED_PACK } from "../data/packs";
 import { verifyPack } from "../core/envelope";
 import { formatDate } from "../core/format";
-import { refreshLocal, lang, setLanguage, notify, setTheme, theme } from "../state";
+import { refreshLocal, lang, setLanguage, notify, setTheme, theme, accountId, liveState, stopLiveUpdates } from "../state";
+import { getAuthName, getAuthRole, logout } from "../data/auth";
+import { CONSENT_VERSION, saveConsent } from "../data/consent";
+import { api, describeError } from "../data/api";
+import { canAdmin } from "../data/roles";
 import { Badge, Icon, PageHead } from "../components/ui";
 
 export function Settings() {
@@ -14,6 +18,9 @@ export function Settings() {
   const [consent, setConsent] = useState({ guardian: false, cloudSpeech: false, counters: true });
   const [measured, setMeasured] = useState<{ bundleKb: number; verifyMs: number } | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [consentOnServer, setConsentOnServer] = useState(false);
+  const [grantUser, setGrantUser] = useState("");
+  const [grantRoleValue, setGrantRoleValue] = useState("FACILITATOR");
 
   useEffect(() => {
     void ensureIdentity().then(setIdentity);
@@ -23,6 +30,7 @@ export function Settings() {
       getSetting("cloud_speech", false),
       getSetting("aggregate_counters", true),
     ]).then(([guardian, cloudSpeech, counters]) => setConsent({ guardian, cloudSpeech, counters }));
+    void getSetting("consent_on_server", false).then(setConsentOnServer);
 
     const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
     const bytes = resources
@@ -37,6 +45,30 @@ export function Settings() {
   async function toggle(key: "guardian" | "cloudSpeech" | "counters", value: boolean) {
     setConsent((current) => ({ ...current, [key]: value }));
     await setSetting(key === "guardian" ? "guardian_consent" : key === "cloudSpeech" ? "cloud_speech" : "aggregate_counters", value);
+    // Consent is server-authoritative: mirror the change upward and show whether it landed.
+    const pushed = await saveConsent({
+      guardian: key === "guardian" ? value : consent.guardian,
+      cloudSpeech: key === "cloudSpeech" ? value : consent.cloudSpeech,
+      aggregateCounters: key === "counters" ? value : consent.counters,
+      version: CONSENT_VERSION,
+      onServer: false,
+      pushedAt: null,
+    });
+    setConsentOnServer(pushed.onServer);
+    if (pushed.onServer) notify(L("सहमति सर्वर पर दर्ज", "Consent recorded on the server"), "good");
+    else notify(L("सहमति इस फ़ोन पर रुकी — नेटवर्क पर जाएँ", "Consent is queued here until the network returns"), "warn");
+  }
+
+  async function grantRole(target: string, role: string) {
+    try {
+      await api(`/v1/admin/users/${encodeURIComponent(target)}:grant-role`, {
+        method: "POST",
+        body: JSON.stringify({ role }),
+      });
+      notify(L("भूमिका दी गई — दोबारा साइन इन पर लागू", "Role granted — effective at the next sign-in"), "good");
+    } catch (problem) {
+      notify(describeError(problem), "warn");
+    }
   }
 
   return (
@@ -49,6 +81,54 @@ export function Settings() {
           "Pseudonymous identity, versioned consent, and an age on every result.",
         )}
       />
+
+      <section class="card" style="margin-bottom:12px">
+        <div class="row-between">
+          <h3>{L("खाता", "Account")}</h3>
+          <Badge tone={liveState.value === "live" ? "good" : liveState.value === "offline" ? "warn" : "plain"}>
+            {liveState.value === "live" ? L("लाइव", "live") : liveState.value === "offline" ? L("फिर जुड़ेगा", "reconnecting") : L("बंद", "off")}
+          </Badge>
+        </div>
+        {accountId.value ? (
+          <>
+            <dl class="kv mt-2">
+              <dt>{L("उपयोगकर्ता नाम", "Username")}</dt>
+              <dd>{getAuthName() ?? "—"}</dd>
+              <dt>{L("भूमिका", "Role")}</dt>
+              <dd>{getAuthRole() ?? "STUDENT"}</dd>
+              <dt>{L("खाता आईडी", "Account id")}</dt>
+              <dd class="sig">{accountId.value}</dd>
+            </dl>
+            <p class="tiny muted mt-2">
+              {L(
+                "इस खाते का डेटा इस फ़ोन पर अलग रखा जाता है — दूसरा खाता इसे नहीं देख सकता।",
+                "This account's data is stored separately on this phone; another account cannot read it.",
+              )}
+            </p>
+            <button
+              class="btn secondary mt-3"
+              onClick={() => {
+                stopLiveUpdates();
+                logout();
+                window.location.hash = "#/";
+                window.location.reload();
+              }}
+            >
+              {L("साइन आउट", "Sign out")}
+            </button>
+          </>
+        ) : (
+          <>
+            <p class="muted tiny mt-2">
+              {L("आप बिना खाते के चल रहे हैं। सिंक और लाइव अपडेट के लिए साइन इन करें।", "You are using Sopaan without an account. Sign in for sync and live updates.")}
+            </p>
+            <div class="btn-row mt-3">
+              <a class="btn saffron small" href="#/login">{L("लॉगिन", "Login")}</a>
+              <a class="btn secondary small" href="#/register">{L("साइन अप", "Sign up")}</a>
+            </div>
+          </>
+        )}
+      </section>
 
       <section class="card" style="margin-bottom:12px">
         <h3>{L("रूप", "Appearance")}</h3>
@@ -96,11 +176,48 @@ export function Settings() {
         </label>
         <div class="callout mt-3">
           {L(
-            "अनुमति संस्करण consent-2026-10 है। रॉ ऑडियो डिफ़ॉल्ट रूप से डिवाइस नहीं छोड़ता; कोई आधार संख्या नहीं मांगी जाती।",
-            "Consent version is consent-2026-10. Raw audio does not leave the device by default; no Aadhaar number is collected.",
+            "अनुमति संस्करण consent-2026-10 है और सर्वर पर दर्ज होती है। रॉ ऑडियो डिफ़ॉल्ट रूप से डिवाइस नहीं छोड़ता; कोई आधार संख्या नहीं मांगी जाती।",
+            "Consent is versioned (consent-2026-10) and recorded on the server. Raw audio does not leave the device by default; no Aadhaar number is collected.",
           )}
         </div>
+        <p class="tiny muted mt-2">
+          {consentOnServer
+            ? L("सर्वर पर दर्ज", "recorded on the server")
+            : L("इस फ़ोन पर लंबित", "pending on this phone")}
+        </p>
       </section>
+
+      {canAdmin() && (
+        <section class="card" style="margin-bottom:12px">
+          <div class="row-between">
+            <h3>{L("भूमिकाएँ", "Roles")}</h3>
+            <Badge tone="plum">{L("प्रशासक", "admin")}</Badge>
+          </div>
+          <p class="tiny muted mt-1">
+            {L(
+              "भूमिका केवल प्रशासक देता है; हर बदलाव हैश-चेन ऑडिट में जाता है।",
+              "Only an administrator grants a role; every change goes to the hash-chained audit log.",
+            )}
+          </p>
+          <div class="stack mt-2">
+            <div class="field">
+              <label>{L("उपयोगकर्ता नाम", "Username")}</label>
+              <input class="input" value={grantUser} onInput={(event) => setGrantUser((event.target as HTMLInputElement).value)} placeholder="username" />
+            </div>
+            <div class="field">
+              <label>{L("भूमिका", "Role")}</label>
+              <select class="select" value={grantRoleValue} onChange={(event) => setGrantRoleValue((event.target as HTMLSelectElement).value)}>
+                {["STUDENT", "FACILITATOR", "REVIEWER", "SPONSOR", "ADMIN"].map((role) => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <button class="btn secondary small mt-2" onClick={() => grantRole(grantUser.trim(), grantRoleValue)} disabled={!grantUser.trim()}>
+            {L("भूमिका दें", "Grant role")}
+          </button>
+        </section>
+      )}
 
       <section class="card" style="margin-bottom:12px">
         <h3>{L("डिवाइस पहचान", "Device identity")}</h3>

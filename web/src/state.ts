@@ -4,7 +4,9 @@ import { computed, signal } from "@preact/signals";
 import { decodePayload, type PackPayload, type RegistryPayload } from "./core/envelope";
 import type { AllowanceRow, TokenRow, CredentialRow } from "./data/db";
 import type { OutboxSummary } from "./data/outbox";
-import { db, ensureIdentity, getSetting, setSetting, type DeviceIdentity } from "./data/db";
+import { activeAccountKey, db, ensureIdentity, getSetting, setSetting, useAccount, type DeviceIdentity } from "./data/db";
+import { getAuthToken, getAuthUserId } from "./data/auth";
+import { connectRealtime, type RealtimeHandle } from "./data/realtime";
 import { ensureArtifacts, fetchLatestArtifacts, getActivePack, importPackText } from "./data/packs";
 import { confirmFields, loadProfile, seedDemoProfile, type FieldConfirmation, type ProfileSnapshot } from "./data/profile";
 import { refreshWallet } from "./data/wallet";
@@ -39,6 +41,9 @@ export const lastSync = signal<string | null>(null);
 export const conflicts = signal<{ field: string; values: unknown[]; devices: string[] }[]>([]);
 export const toast = signal<{ id: number; text: string; tone: "good" | "warn" | "bad" } | null>(null);
 export const tourStep = signal(0);
+export const accountId = signal<string | null>(null);
+export const liveState = signal<"off" | "live" | "offline">("off");
+export const lastLiveEvent = signal<{ type: string; at: number } | null>(null);
 export const selectedCareer = signal<string | null>(null);
 export const selectedScheme = signal<string | null>(null);
 
@@ -99,8 +104,53 @@ export async function refreshLocal(): Promise<void> {
   conflicts.value = await getConflicts();
 }
 
+let realtimeHandle: RealtimeHandle | null = null;
+let lastLiveToastAt = 0;
+
+/** Open the account-scoped live stream. Safe to call repeatedly. */
+export async function startLiveUpdates(): Promise<void> {
+  realtimeHandle?.close();
+  realtimeHandle = null;
+  if (!getAuthToken()) {
+    liveState.value = "off";
+    return;
+  }
+  const base = await serverBase();
+  realtimeHandle = connectRealtime(base, {
+    onState: (state) => {
+      liveState.value = state;
+    },
+    onFrame: (frame) => {
+      lastLiveEvent.value = { type: frame.type, at: Date.now() };
+      void refreshLocal();
+      // One readable line per burst, not one per event.
+      const now = Date.now();
+      if (now - lastLiveToastAt < 4000) return;
+      lastLiveToastAt = now;
+      notify(
+        lang.value === "hi"
+          ? "इस खाते में नया अपडेट आया"
+          : "New update on this account",
+        "good",
+      );
+    },
+  });
+}
+
+export function stopLiveUpdates(): void {
+  realtimeHandle?.close();
+  realtimeHandle = null;
+  liveState.value = "off";
+}
+
 export async function bootstrap(): Promise<void> {
   try {
+    // Every account gets its own local store, so signing in as someone else never shows
+    // the previous learner's profile, wallet or outbox.
+    const owner = getAuthUserId();
+    await useAccount(owner);
+    accountId.value = activeAccountKey();
+
     const id = await ensureIdentity();
     identity.value = id;
     const storedLang = await getSetting<Lang>("language", "hi");
@@ -114,20 +164,22 @@ export async function bootstrap(): Promise<void> {
 
     await ensureRoster();
     await ensureAllowance();
-    // The prototype ships Radha's demo profile so every screen is explorable on first run.
-    // It is written through the same confirmation path, so the outbox and sources stay real.
-    const existing = await loadProfile();
-    if (Object.keys(existing.values).length === 0) await seedDemoProfile();
+    // Demo profile is opt-in. Real-time multi-user mode starts with empty profile.
+    // Users can load demo via loadDemoLearner() if desired.
     await refreshLocal();
     online.value = navigator.onLine;
     ready.value = true;
 
     window.addEventListener("online", () => {
       online.value = true;
+      void startLiveUpdates();
     });
     window.addEventListener("offline", () => {
       online.value = false;
+      liveState.value = "offline";
     });
+
+    await startLiveUpdates();
   } catch (error) {
     bootError.value = String(error);
     ready.value = true;

@@ -1,7 +1,7 @@
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { formatRupees } from "../core/format";
-import { lang, profile, confirmProfileFields } from "../state";
+import { lang, profile, confirmProfileFields, notify } from "../state";
 import { t, pickLocalised, type Lang } from "../i18n";
 import { CATEGORY_OPTIONS, EDUCATION_OPTIONS, INTEREST_OPTIONS, SKILL_OPTIONS, type FieldConfirmation } from "../data/profile";
 import { Badge, Icon, Modal, PageHead } from "../components/ui";
@@ -12,6 +12,7 @@ import {
   type VoiceQuestion,
 } from "../voice/grammar";
 import { listenOnce, speechInputAvailable } from "../voice/stt";
+import { listenOffline, offlineSpeechStatus, type SpeechTier } from "../voice/offline";
 import { speak, ttsAvailable } from "../voice/tts";
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -98,6 +99,11 @@ export function Profile() {
   const [manualOpen, setManualOpen] = useState(false);
   const form = useSignal<Record<string, string>>({});
   const multi = useSignal<string[]>([]);
+  const [speechTier, setSpeechTier] = useState<SpeechTier>("keyboard");
+
+  useEffect(() => {
+    void offlineSpeechStatus().then((status) => setSpeechTier(status.tier));
+  }, []);
 
   const questions = VOICE_QUESTIONS;
   const question = questions[Math.min(index, questions.length - 1)];
@@ -131,11 +137,29 @@ export function Profile() {
 
   async function listen(): Promise<void> {
     setListening(true);
+    // Offline closed grammar first: it never sends audio anywhere. The browser recogniser is the
+    // online upgrade, and icons are the floor nobody can fall through.
+    const offline = await listenOffline(question, language);
+    if (offline.transcript) {
+      setListening(false);
+      setTranscript(offline.transcript);
+      const slot = parseAnswer(question, offline.transcript);
+      if (slot) beginReadback(question, slot.value, slot.confidence, "stt");
+      else setMode("icon");
+      return;
+    }
     const result = await listenOnce(language);
     setListening(false);
     if (!result.transcript) {
       setTranscript("");
       setMode("icon");
+      notify(
+        L(
+          "इस फ़ोन पर बोलकर जवाब देने की सुविधा नहीं है — आइकन या लिखकर चुनें।",
+          "Voice input is not available on this phone — use the icons or type instead.",
+        ),
+        "warn",
+      );
       return;
     }
     setTranscript(result.transcript);
@@ -206,7 +230,13 @@ export function Profile() {
             {L("सवाल", "Question")} {Math.min(index + 1, questions.length)} / {questions.length}
           </span>
           <div class="row" style="gap:6px">
-            <Badge tone="plain">{speechInputAvailable() ? L("माइक उपलब्ध", "Mic available") : L("आइकन चुनें", "Use icons")}</Badge>
+            <Badge tone={speechTier === "model" ? "good" : "plain"}>
+              {speechTier === "model"
+                ? L("ऑफ़लाइन आवाज़", "Offline voice")
+                : speechInputAvailable()
+                  ? L("माइक (ऑनलाइन)", "Mic (online)")
+                  : L("आइकन चुनें", "Use icons")}
+            </Badge>
           </div>
         </div>
         <h2 style="margin-top:8px">

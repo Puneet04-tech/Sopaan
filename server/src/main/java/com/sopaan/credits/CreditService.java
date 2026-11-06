@@ -5,7 +5,7 @@ import com.sopaan.audit.AuditService;
 import com.sopaan.common.ApiException;
 import com.sopaan.common.CanonicalJson;
 import com.sopaan.common.Envelope;
-import com.sopaan.config.KeyStore;
+import com.sopaan.common.KeyStore;
 import com.sopaan.passport.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

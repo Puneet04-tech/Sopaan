@@ -1,16 +1,40 @@
+import { useEffect, useState } from "preact/hooks";
 import { formatRupees } from "../core/format";
 import { POOLS } from "../data/credits";
+import { api } from "../data/api";
+import { canFacilitate, canSponsor, currentRole } from "../data/roles";
 import { lang, tokens, wallet } from "../state";
 import { Badge, Icon, Meter, PageHead } from "../components/ui";
 
-const POOL_FUNDING: Record<string, number> = {
-  "POOL-SKILL-2026": 100000,
-  "POOL-WELD-2026": 40000,
-};
+interface ServerPool {
+  pool_id: string;
+  sponsor: string;
+  total_inr: number;
+  remaining_inr: number;
+  milestone: string;
+  status: string;
+}
 
 export function Sponsor() {
   const language = lang.value;
   const L = (hi: string, en: string) => (language === "hi" || language === "mr" ? hi : en);
+
+  const [serverPools, setServerPools] = useState<Record<string, ServerPool>>({});
+  const authorised = canSponsor() || canFacilitate();
+
+  useEffect(() => {
+    if (!authorised) return;
+    void (async () => {
+      try {
+        const body = await api<{ pools: ServerPool[] }>("/v1/credits/pools");
+        const map: Record<string, ServerPool> = {};
+        for (const pool of body.pools ?? []) map[pool.pool_id] = pool;
+        setServerPools(map);
+      } catch {
+        setServerPools({});
+      }
+    })();
+  }, [authorised]);
 
   const released = tokens.value
     .filter((token) => token.status === "SETTLED" || token.status === "REDEEMED")
@@ -33,7 +57,16 @@ export function Sponsor() {
           "यह दृश्य केवल समूह आँकड़े दिखाता है। किसी विद्यार्थी की पहचान, नाम या संपर्क यहाँ नहीं आता।",
           "This view shows aggregates only. No student identity, name or contact ever appears here.",
         )}
-        action={<Badge tone="plum">{L("समूह", "Aggregate")}</Badge>}
+        action={
+          <div class="row wrap">
+            <Badge tone="plum">{L("समूह", "Aggregate")}</Badge>
+            <Badge tone={Object.keys(serverPools).length > 0 ? "good" : "plain"}>
+              {Object.keys(serverPools).length > 0
+                ? L("कोष सर्वर से", "pools from server")
+                : L("कोष स्थानीय अनुमान", `local estimate · ${currentRole()}`)}
+            </Badge>
+          </div>
+        }
       />
 
       <section class="card dark" style="margin-bottom:12px">
@@ -53,7 +86,8 @@ export function Sponsor() {
 
       <div class="stack" style="margin-bottom:12px">
         {Object.entries(POOLS).map(([poolId, pool]) => {
-          const funded = POOL_FUNDING[poolId] ?? 0;
+          const serverPool = serverPools[poolId];
+          const funded = serverPool ? serverPool.total_inr : pool.amount_inr * 40;
           const used = tokens.value
             .filter((token) => token.status !== "FLAGGED")
             .filter((token) => {

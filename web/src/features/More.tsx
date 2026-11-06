@@ -1,6 +1,14 @@
 import { lang, navigate, wallet, pack } from "../state";
 import { t } from "../i18n";
+import { canAdmin, canFacilitate, canReview, canSponsor, currentRole } from "../data/roles";
 import { Icon, PageHead, Badge } from "../components/ui";
+
+/** Which role may open an item; absent means every signed-in learner. */
+const NEEDS: Record<string, () => boolean> = {
+  "/hub": canFacilitate,
+  "/review": canReview,
+  "/sponsor": canSponsor,
+};
 
 const GROUPS = [
   {
@@ -72,14 +80,17 @@ export function More() {
       </section>
 
       <div class="stack-lg">
-        {GROUPS.map((group) => (
+        {GROUPS.map((group) => {
+          const items = group.items.filter((item) => (NEEDS[item.path] ? NEEDS[item.path]() : true));
+          if (items.length === 0) return null;
+          return (
           <section key={group.title.en}>
             <div class="row-between" style="margin:0 2px 8px">
               <h3>{L(group.title.hi, group.title.en)}</h3>
-              <span class="tiny muted">{group.items.length}</span>
+              <span class="tiny muted">{items.length}</span>
             </div>
             <div class="list">
-              {group.items.map((item) => (
+              {items.map((item) => (
                 <button
                   key={item.path}
                   class="list-item"
@@ -98,12 +109,14 @@ export function More() {
               ))}
             </div>
           </section>
-        ))}
+          );
+        })}
       </div>
 
       <div class="row wrap" style="margin:16px 2px;justify-content:center">
         <Badge tone="plain">pack {pack.value?.version ?? "—"}</Badge>
-        <Badge tone="plum">{L("डेमो कुंजियाँ", "Demo keys")}</Badge>
+        <Badge tone="plum">{L("भूमिका: " + currentRole(), "role: " + currentRole())}</Badge>
+        {canAdmin() && <Badge tone="good">{L("प्रशासक", "administrator")}</Badge>}
       </div>
     </div>
   );

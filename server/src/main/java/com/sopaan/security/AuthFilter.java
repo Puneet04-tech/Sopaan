@@ -22,9 +22,11 @@ import java.util.Map;
 public class AuthFilter extends OncePerRequestFilter {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private final JwtService jwt;
+    private final RateLimiter limiter;
 
-    public AuthFilter(JwtService jwt) {
+    public AuthFilter(JwtService jwt, RateLimiter limiter) {
         this.jwt = jwt;
+        this.limiter = limiter;
     }
 
     @Override
@@ -44,6 +46,18 @@ public class AuthFilter extends OncePerRequestFilter {
                 request.setAttribute("auth.kid", claims.kid());
             }
         }
+        Object subject = request.getAttribute("auth.sub");
+        String caller = subject == null ? "ip:" + request.getRemoteAddr() : "sub:" + subject;
+        RateLimiter.Decision decision = quota(path, caller);
+        if (!decision.allowed()) {
+            response.setStatus(429);
+            response.setContentType("application/json");
+            response.setHeader("Retry-After", String.valueOf(decision.retryAfterSeconds()));
+            response.getWriter().write(MAPPER.writeValueAsString(Map.of(
+                    "error", "rate_limited",
+                    "retry_after_seconds", decision.retryAfterSeconds())));
+            return;
+        }
         if (isPublic(path, request.getMethod()) || request.getAttribute("auth.role") != null) {
             chain.doFilter(request, response);
             return;
@@ -53,8 +67,25 @@ public class AuthFilter extends OncePerRequestFilter {
         response.getWriter().write(MAPPER.writeValueAsString(Map.of("error", "authentication_required", "path", path)));
     }
 
+    /**
+     * Budgets chosen from the design's sync burst model: one class syncs 60 phones after a
+     * power cut, so a device may push often, while password guessing is cut hard.
+     */
+    private RateLimiter.Decision quota(String path, String caller) {
+        if (path.equals("/v1/sync/push")) return limiter.check(caller, 60, 60);
+        if (path.startsWith("/v1/auth/register") || path.startsWith("/v1/auth/login")) {
+            return limiter.check(caller, 12, 12);
+        }
+        if (path.startsWith("/v1/credentials") || path.startsWith("/v1/credits")) {
+            return limiter.check(caller, 60, 60);
+        }
+        return new RateLimiter.Decision(true, 1, 0);
+    }
+
     private boolean isPublic(String path, String method) {
         return path.equals("/v1/devices:enroll")
+                || path.startsWith("/v1/auth/register")
+                || path.startsWith("/v1/auth/login")
                 || path.startsWith("/v1/packs/")
                 || path.equals("/v1/packs")
                 || path.equals("/v1/registry/snapshot")

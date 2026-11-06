@@ -12,6 +12,9 @@ import {
 } from "../data/hub";
 import { pickLocalised } from "../i18n";
 import type { RosterRow } from "../data/db";
+import { api } from "../data/api";
+import { canFacilitate, currentRole } from "../data/roles";
+import { cohortMembers, type CohortMember } from "../data/hub";
 import { identity, lang, notify, pack, refreshLocal, registry, wallet } from "../state";
 import { Badge, Icon, Modal, PageHead } from "../components/ui";
 
@@ -19,7 +22,7 @@ export function Hub() {
   const language = lang.value;
   const L = (hi: string, en: string) => (language === "hi" || language === "mr" ? hi : en);
   const [students, setStudents] = useState<RosterRow[]>([]);
-  const currentStudentId = identity.value?.studentId ?? "demo-student-01";
+  const currentStudentId = identity.value?.studentId ?? "";
   const [studentId, setStudentId] = useState(currentStudentId);
   const [skill, setSkill] = useState("TAILOR.L2");
   const [level, setLevel] = useState(2);
@@ -28,10 +31,27 @@ export function Hub() {
   const [issued, setIssued] = useState<{ envelope: Envelope; qr: string } | null>(null);
   const [done, setDone] = useState<Set<string>>(new Set());
 
+  const [members, setMembers] = useState<CohortMember[]>([]);
+
   useEffect(() => {
     void roster().then(setStudents);
     void completedSteps("tailor-master").then(setDone);
   }, []);
+
+  const allowed = canFacilitate();
+
+  useEffect(() => {
+    if (!allowed) return;
+    void (async () => {
+      try {
+        const body = await api<{ cohorts: { cohort_id: string }[] }>("/v1/cohorts");
+        const first = body.cohorts?.[0];
+        if (first) setMembers(await cohortMembers(first.cohort_id));
+      } catch {
+        setMembers([]);
+      }
+    })();
+  }, [allowed]);
 
   const current = pack.value;
   const pathway = current?.pathways["tailor-master"] ?? [];
@@ -45,6 +65,8 @@ export function Hub() {
     { gross: 0, facilitator: 0, platform: 0 },
   );
 
+  const issuer = (registry.value?.issuers ?? []).find((row) => row.scope?.some((item) => skill === item || skill.startsWith(item + ".")));
+
   async function issue() {
     setBusy(true);
     const result = await issueCredential(
@@ -53,7 +75,16 @@ export function Hub() {
     );
     setBusy(false);
     if (!result.ok || !result.envelope) {
-      notify(`Issue blocked: ${result.reason ?? "unknown"}`, "bad");
+      const reason = result.reason ?? "unknown";
+      const text =
+        reason === "forbidden_role"
+          ? L("इस खाते को सुविधाकर्ता भूमिका नहीं है।", "This account does not hold the facilitator role.")
+          : reason === "issuer_lease_expired"
+            ? L("जारीकर्ता लीज़ समाप्त — सिंक पर नवीनीकरण करें।", "The issuer lease expired — renew it at sync.")
+            : reason === "network_unreachable" || reason === "sign_in_required"
+              ? L("जारी करने के लिए सर्वर से जुड़ना ज़रूरी है।", "Issuing needs the hub server; connect and try again.")
+              : reason.replace(/_/g, " ");
+      notify(text, "bad");
       return;
     }
     const qr = await QRCode.toDataURL(JSON.stringify(result.envelope), {
@@ -65,13 +96,37 @@ export function Hub() {
     setIssued({ envelope: result.envelope, qr });
     await refreshLocal();
     setStudents(await roster());
-    notify(`${skill} credential issued under the leased key`, "good");
+    notify(L(`${skill} प्रमाण लीज़्ड कुंजी से जारी हुआ`, `${skill} credential issued under the leased key`), "good");
   }
 
   async function finish(step: string) {
     await markAssessmentComplete("tailor-master", step);
     setDone(await completedSteps("tailor-master"));
     await refreshLocal();
+  }
+
+  if (!allowed) {
+    return (
+      <div class="screen">
+        <PageHead
+          kicker={L("सुविधाकर्ता हब", "Facilitator hub")}
+          title={L("यह दृश्य शिक्षकों के लिए है", "This screen is for facilitators")}
+          sub={L(
+            `प्रमाण जारी करने के लिए FACILITATOR भूमिका चाहिए। आपकी भूमिका: ${currentRole()}।`,
+            `Issuing a credential needs the FACILITATOR role. Your role: ${currentRole()}.`,
+          )}
+        />
+        <section class="card">
+          <h3>{L("भूमिका कैसे मिले", "How a role is granted")}</h3>
+          <p class="muted mt-2">
+            {L(
+              "प्रशासक सेटिंग्स → भूमिकाएँ से भूमिका देता है। हर बदलाव ऑडिट में दर्ज होता है।",
+              "An administrator grants it from Settings → Roles. Every change is written to the audit log.",
+            )}
+          </p>
+        </section>
+      </div>
+    );
   }
 
   return (
@@ -117,6 +172,31 @@ export function Hub() {
             "The name roster stays on the hub; only pseudonymous IDs reach the cloud.",
           )}
         </p>
+        {members.length > 0 && (
+          <>
+            <h4 class="mt-3">{L("कक्षा सदस्य (सर्वर से)", "Cohort members (from server)")}</h4>
+            <table class="simple mt-2">
+              <thead>
+                <tr>
+                  <th>{L("छद्म उपनाम", "Pseudonymous")}</th>
+                  <th>{L("प्रमाण", "Creds")}</th>
+                  <th>{L("टकराव", "Conflicts")}</th>
+                  <th>{L("अंतिम बार", "Last seen")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((member) => (
+                  <tr key={member.student_id}>
+                    <td>{member.display_alias || member.student_id.slice(0, 8)}</td>
+                    <td>{member.credentials}</td>
+                    <td>{member.conflicts}</td>
+                    <td>{member.last_seen ? formatDate(member.last_seen) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </section>
 
       <section class="card" style="margin-bottom:12px">
@@ -128,7 +208,15 @@ export function Hub() {
           <div class="field">
             <label>{L("छात्र", "Student")}</label>
             <select class="select" value={studentId} onChange={(event) => setStudentId((event.target as HTMLSelectElement).value)}>
-              <option value={currentStudentId}>Radha (this device)</option>
+              <option value={currentStudentId}>
+                {students.find((student) => student.studentId === currentStudentId)?.alias ?? L("यह विद्यार्थी", "This learner")}{" "}
+                ({L("यह डिवाइस", "this device")})
+              </option>
+              {members.map((member) => (
+                <option key={member.student_id} value={member.student_id}>
+                  {member.display_alias || member.student_id.slice(0, 8)}
+                </option>
+              ))}
               {students
                 .filter((student) => student.studentId !== currentStudentId)
                 .map((student) => (
@@ -165,10 +253,15 @@ export function Hub() {
             <input class="input" value={evidence} onInput={(event) => setEvidence((event.target as HTMLInputElement).value)} />
           </div>
           <div class="callout teal">
-            {L(
-              `लीज़: ${HUB_SKILLS.find((item) => item.code === skill)?.label} · कुंजी ${"L1IBI7f7x0g"} · समाप्ति 31 Dec 2026`,
-              `Lease: ${HUB_SKILLS.find((item) => item.code === skill)?.label} · key L1IBI7f7x0g · expires 31 Dec 2026`,
-            )}
+            {issuer
+              ? L(
+                  `लीज़: ${issuer.org} · कुंजी ${issuer.kid} epoch ${issuer.epoch} · समाप्ति ${formatDate(issuer.valid_to)}`,
+                  `Lease: ${issuer.org} · key ${issuer.kid} epoch ${issuer.epoch} · expires ${formatDate(issuer.valid_to)}`,
+                )
+              : L(
+                  "इस कौशल के लिए कोई अधिकृत जारीकर्ता रजिस्ट्री में नहीं है।",
+                  "No authorised issuer in the registry covers this skill.",
+                )}
           </div>
           <button class="btn saffron" disabled={busy} onClick={issue}>
             <Icon name="id" size={17} />
@@ -237,7 +330,7 @@ export function Hub() {
             <div class="stack mt-3">
               <div class="row-between"><span class="muted tiny">{L("कौशल", "Skill")}</span><strong>{skill}</strong></div>
               <div class="row-between"><span class="muted tiny">{L("वैधता", "Valid until")}</span><span class="tiny">{formatDate(new Date(Date.now() + 365 * 86_400_000).toISOString())}</span></div>
-              <div class="row-between"><span class="muted tiny">{L("कुंजी", "Key")}</span><span class="sig">L1IBI7f7x0g · epoch 3</span></div>
+              <div class="row-between"><span class="muted tiny">{L("कुंजी", "Key")}</span><span class="sig">{issuer ? `${issuer.kid} · epoch ${issuer.epoch}` : "—"}</span></div>
             </div>
             <div class="callout mt-3">
               {L(
@@ -252,8 +345,8 @@ export function Hub() {
 
       <p class="tiny muted center mt-3">
         {L(
-          "डेमो हब कुंजी सार्वजनिक है। असली तैनाती में यह कुंजी केवल सुविधाकर्ता के डिवाइस पर रहेगी।",
-          "The demo hub key is published. A real deployment keeps this key on the facilitator's device only.",
+          "हस्ताक्षर हब सर्वर पर होते हैं: निजी कुंजी ब्राउज़र में नहीं आती, सर्वर स्कोप, लीज़ और epoch जाँचता है और रजिस्ट्री में काउंटरसाइन करता है।",
+          "Signing happens on the hub server: the private key never reaches the browser, and the server checks scope, lease and epoch before countersigning into the registry.",
         )}
       </p>
     </div>

@@ -89,6 +89,8 @@ Network → Offline, or airplane mode) before step 4: the chain keeps working fr
 
 ## Docs
 
+- [`PROJECT_GUIDE.md`](PROJECT_GUIDE.md) — end-to-end workflow, architecture audit against the
+  diagram, accounts/isolation/real-time model, and a description of every screen
 - [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) — build order and status
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — HLD/LLD as built
 - [`docs/API.md`](docs/API.md) — REST + FastAPI contracts

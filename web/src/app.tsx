@@ -19,7 +19,10 @@ import { Settings } from "./features/Settings";
 import { More } from "./features/More";
 import { Tour } from "./features/Tour";
 import { Landing } from "./features/Landing";
-import { bootError, landingSeen, ready, route } from "./state";
+import { Login } from "./features/Login";
+import { Register } from "./features/Register";
+import { bootError, ready, route } from "./state";
+import { getAuthToken } from "./data/auth";
 
 export function App() {
   useEffect(() => {
@@ -71,11 +74,29 @@ export function App() {
   const head = segments[0] ?? "";
   const param = segments[1];
 
-  // First visit opens the story before the tool. Deep links still go straight to their screen.
-  if (head === "welcome" || (head === "" && !landingSeen.value)) return <Landing />;
+  const hasToken = !!getAuthToken();
+  // Show landing for unauthenticated users on root/welcome, otherwise go to app
+  if (head === "welcome" || (head === "" && !hasToken)) return <Landing />;
+  if (head === "" && hasToken) {
+    route.value = "/discover";
+    window.location.hash = "#/discover";
+    return <Layout><Discover /></Layout>;
+  }
 
   let screen = <Home />;
   switch (head) {
+    case "login":
+      return (
+        <div class="app">
+          <Login />
+        </div>
+      );
+    case "register":
+      return (
+        <div class="app">
+          <Register />
+        </div>
+      );
     case "":
       screen = <Home />;
       break;

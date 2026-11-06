@@ -52,3 +52,6 @@ ai/.cache/
 # --- Generated copies (rebuild with: npm run packs) ---
 web/public/packs/
 web/src/generated/
+
+# --- Local tool binaries (k6 download, not source) ---
+tools/bin/

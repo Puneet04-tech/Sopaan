@@ -3,7 +3,7 @@ package com.sopaan.rules;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sopaan.audit.AuditService;
 import com.sopaan.common.ApiException;
-import com.sopaan.config.KeyStore;
+import com.sopaan.common.KeyStore;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,14 +76,16 @@ public class ReviewService {
         return cases;
     }
 
+    /**
+     * Co-sign a pack as the signed-in reviewer account. The key id is never taken from the body:
+     * an account is allocated one of the three reviewer seats for this pack, so the same person
+     * cannot reach quorum twice with two browser tabs.
+     */
     @Transactional
-    public Map<String, Object> approve(String packId, String reviewerKid, String actor) {
+    public Map<String, Object> approve(String packId, String accountId, String actor) {
         PackRef ref = parse(packId);
         JsonNode payload = payload(packId);
-        KeyStore.Key reviewer = keys.byKid(reviewerKid);
-        if (reviewer == null || !reviewer.role().startsWith("reviewer")) {
-            throw new ApiException(400, "unknown_reviewer_key");
-        }
+        String reviewerKid = seat(packId, accountId);
         String expiresAt = payload.path("expires_at").asText(LocalDate.now().plusMonths(2).toString());
         Integer exists = jdbc.queryForObject("SELECT COUNT(*) FROM rule_pack WHERE pack_id = ?", Integer.class, packId);
         if (exists == null || exists == 0) {
@@ -96,8 +98,10 @@ public class ReviewService {
                 "MERGE INTO review_signature (pack_id, reviewer_kid, signed_at) KEY(pack_id, reviewer_kid) VALUES (?,?, CURRENT_TIMESTAMP)",
                 packId, reviewerKid);
 
+        // Quorum counts seats (one per account), never rows in review_signature: that table may
+        // carry a historical or seeded reviewer row that no account stands behind.
         Long count = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM review_signature WHERE pack_id = ?", Long.class, packId);
+                "SELECT COUNT(*) FROM review_seat WHERE pack_id = ?", Long.class, packId);
         boolean goldenPass = golden(packId).stream().allMatch(row -> Boolean.TRUE.equals(row.get("pass")));
         String status = (count != null && count >= 2 && goldenPass) ? "PUBLISHABLE" : "REVIEWING";
         jdbc.update("UPDATE rule_pack SET reviewers = ?, status = ? WHERE pack_id = ?", count == null ? 0 : count, status, packId);
@@ -109,6 +113,44 @@ public class ReviewService {
                 "quorum", 2,
                 "golden_pass", goldenPass,
                 "status", status);
+    }
+
+    /** The reviewer seat held by this account on this pack, allocated on first use. */
+    private String seat(String packId, String accountId) {
+        if (accountId == null || accountId.isBlank()) throw new ApiException(401, "authentication_required");
+        List<String> held = jdbc.queryForList(
+                "SELECT reviewer_kid FROM review_seat WHERE pack_id = ? AND user_id = ?",
+                String.class, packId, accountId);
+        if (!held.isEmpty()) return held.get(0);
+
+        List<String> taken = jdbc.queryForList(
+                "SELECT reviewer_kid FROM review_seat WHERE pack_id = ?", String.class, packId);
+        for (int slot = 1; slot <= 3; slot++) {
+            KeyStore.Key candidate = keys.key("reviewer-" + slot);
+            if (candidate == null || taken.contains(candidate.kid())) continue;
+            jdbc.update(
+                    "INSERT INTO review_seat (pack_id, user_id, reviewer_kid) VALUES (?,?,?)",
+                    packId, accountId, candidate.kid());
+            return candidate.kid();
+        }
+        throw new ApiException(409, "all_reviewer_seats_taken");
+    }
+
+    public Map<String, Object> signatures(String packId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT reviewer_kid, user_id, created_at FROM review_seat WHERE pack_id = ? ORDER BY created_at",
+                packId);
+        boolean goldenPass = golden(packId).stream().allMatch(row -> Boolean.TRUE.equals(row.get("pass")));
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM rule_pack WHERE pack_id = ?", Integer.class, packId);
+        return Map.of(
+                "pack_id", packId,
+                "signatures", rows,
+                "reviewers", rows.size(),
+                "quorum", 2,
+                "golden_pass", goldenPass,
+                "publishable", rows.size() >= 2 && goldenPass,
+                "registered", count != null && count > 0);
     }
 
     public List<Map<String, Object>> list() {

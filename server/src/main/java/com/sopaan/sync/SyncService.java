@@ -8,6 +8,8 @@ import com.sopaan.common.Ed25519;
 import com.sopaan.common.Ids;
 import com.sopaan.rules.PackService;
 import com.sopaan.security.JwtService;
+import com.sopaan.security.StudentScope;
+import com.sopaan.realtime.RealtimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,20 +43,41 @@ public class SyncService {
     private final JwtService jwt;
     private final PackService packs;
     private final AuditService audit;
+    private final RealtimeService realtime;
+    private final StudentScope scope;
 
     @Value("${sopaan.demo-mode:false}")
     private boolean demoMode;
 
-    public SyncService(JdbcTemplate jdbc, JwtService jwt, PackService packs, AuditService audit) {
+    public SyncService(JdbcTemplate jdbc, JwtService jwt, PackService packs, AuditService audit,
+                       RealtimeService realtime, StudentScope scope) {
         this.jdbc = jdbc;
         this.jwt = jwt;
         this.packs = packs;
         this.audit = audit;
+        this.realtime = realtime;
+        this.scope = scope;
     }
 
-    public Map<String, Object> enroll(String deviceId, String studentId, String pubkey, String requestedRole) {
-        if (blank(deviceId) || blank(studentId) || blank(pubkey)) throw new ApiException(400, "device_fields_required");
-        if (deviceId.length() > 36 || studentId.length() > 36 || pubkey.length() > 80) throw new ApiException(400, "device_fields_too_long");
+    /**
+     * Enrol a device key. When the caller is a signed-in account the device is bound to
+     * that account's own student id and user id; the body's {@code student_id} is then
+     * informational only and cannot be used to enrol against someone else.
+     */
+    public Map<String, Object> enroll(String deviceId, String studentId, String pubkey, String requestedRole,
+                                      String userId) {
+        if (blank(deviceId) || blank(pubkey)) throw new ApiException(400, "device_fields_required");
+        if (deviceId.length() > 36 || pubkey.length() > 80) throw new ApiException(400, "device_fields_too_long");
+
+        String effectiveStudent = studentId;
+        if (userId != null) {
+            String own = scope.studentForUser(userId);
+            if (own == null) throw new ApiException(403, "no_student_profile");
+            effectiveStudent = own;
+        }
+        if (blank(effectiveStudent) || effectiveStudent.length() > 36) {
+            throw new ApiException(400, "device_fields_required");
+        }
 
         List<String> existing = jdbc.query(
                 "SELECT pubkey FROM device WHERE device_id = ?",
@@ -62,14 +85,15 @@ public class SyncService {
         if (!existing.isEmpty() && !existing.get(0).equals(pubkey)) {
             throw new ApiException(409, "device_key_mismatch");
         }
-        jdbc.update("MERGE INTO student (student_id, created_at) KEY(student_id) VALUES (?, CURRENT_TIMESTAMP)", studentId);
+        jdbc.update("MERGE INTO student (student_id, created_at) KEY(student_id) VALUES (?, CURRENT_TIMESTAMP)", effectiveStudent);
         Integer devices = jdbc.queryForObject("SELECT COUNT(*) FROM device WHERE device_id = ?", Integer.class, deviceId);
         if (devices == null || devices == 0) {
             jdbc.update(
-                    "INSERT INTO device (device_id, student_id, pubkey, hwm_seq) VALUES (?,?,?,0)",
-                    deviceId, studentId, pubkey);
+                    "INSERT INTO device (device_id, student_id, pubkey, hwm_seq, user_id) VALUES (?,?,?,0,?)",
+                    deviceId, effectiveStudent, pubkey, userId);
         } else {
-            jdbc.update("UPDATE device SET student_id = ?, last_seen = CURRENT_TIMESTAMP WHERE device_id = ?", studentId, deviceId);
+            jdbc.update("UPDATE device SET student_id = ?, user_id = COALESCE(?, user_id), last_seen = CURRENT_TIMESTAMP WHERE device_id = ?",
+                    effectiveStudent, userId, deviceId);
         }
 
         String role = "DEVICE";
@@ -81,22 +105,24 @@ public class SyncService {
         return Map.of(
                 "token", token,
                 "role", role,
+                "student_id", effectiveStudent,
                 "expires_at", Instant.now().plus(jwt.ttlSeconds(), ChronoUnit.SECONDS).toString());
     }
 
-    public Map<String, Object> push(String deviceId, JsonNode events) {
-        List<String> pubkeys = jdbc.query(
-                "SELECT pubkey FROM device WHERE device_id = ?",
-                (rs, row) -> rs.getString(1), deviceId);
-        if (pubkeys.isEmpty()) throw new ApiException(403, "device_not_enrolled");
-        String pubkey = pubkeys.get(0);
+    /**
+     * Idempotent ingest. The student scope comes from the caller's own identity, and every
+     * event must come from a device bound to that same student; a device id from another
+     * account is rejected instead of trusted.
+     */
+    public Map<String, Object> push(String subject, String role, JsonNode events) {
+        String scopeStudent = scope.forActor(subject, role);
 
         if (events == null || !events.isArray()) throw new ApiException(400, "events_required");
         if (events.size() > MAX_BATCH) throw new ApiException(413, "batch_too_large");
 
         List<Map<String, String>> rejected = new ArrayList<>();
-        Set<Long> rejectedSeq = new LinkedHashSet<>();
-        List<Long> insertedSeq = new ArrayList<>();
+        Set<String> touchedDevices = new LinkedHashSet<>();
+        Map<String, Set<Long>> rejectedByDevice = new LinkedHashMap<>();
 
         for (JsonNode event : events) {
             String eventId = event.path("event_id").asText("");
@@ -107,42 +133,68 @@ public class SyncService {
             String eventDevice = event.path("device_id").asText("");
             JsonNode payload = event.path("payload");
 
-            if (eventId.isEmpty() || seq <= 0 || type.isEmpty() || sig.isEmpty() || !eventDevice.equals(deviceId)) {
-                reject(deviceId, rejected, rejectedSeq, eventId, seq, "schema_invalid");
+            if (eventId.isEmpty() || seq <= 0 || type.isEmpty() || sig.isEmpty() || eventDevice.isEmpty()) {
+                reject(eventDevice, rejected, rejectedByDevice, eventId, seq, "schema_invalid");
                 continue;
             }
-            if (!signatureOk(pubkey, eventId, deviceId, seq, type, payload, ts, sig)) {
-                reject(deviceId, rejected, rejectedSeq, eventId, seq, "bad_signature");
+
+            List<Map<String, Object>> devices = jdbc.query(
+                    "SELECT pubkey, student_id FROM device WHERE device_id = ?",
+                    (rs, row) -> Map.of(
+                            "pubkey", String.valueOf(rs.getString("pubkey")),
+                            "student_id", String.valueOf(rs.getString("student_id"))),
+                    eventDevice);
+            if (devices.isEmpty()) {
+                reject(eventDevice, rejected, rejectedByDevice, eventId, seq, "device_not_enrolled");
+                continue;
+            }
+            if (!scopeStudent.equals(devices.get(0).get("student_id"))) {
+                // A device belonging to another learner is never allowed to write here.
+                reject(eventDevice, rejected, rejectedByDevice, eventId, seq, "device_not_yours");
+                continue;
+            }
+            String pubkey = String.valueOf(devices.get(0).get("pubkey"));
+            if (!signatureOk(pubkey, eventId, eventDevice, seq, type, payload, ts, sig)) {
+                reject(eventDevice, rejected, rejectedByDevice, eventId, seq, "bad_signature");
                 continue;
             }
 
             try {
                 jdbc.update(
                         "INSERT INTO event (event_id, device_id, seq, type, payload, ts, sig) VALUES (?,?,?,?,?,?,?)",
-                        eventId, deviceId, seq, type, CanonicalJson.of(payload), ts, sig);
-                insertedSeq.add(seq);
-                project(deviceId, type, payload);
+                        eventId, eventDevice, seq, type, CanonicalJson.of(payload), ts, sig);
+                touchedDevices.add(eventDevice);
+                project(eventDevice, type, payload);
+                realtime.broadcastToStudent(scopeStudent, type, Map.of("event_id", eventId, "seq", seq, "ts", ts));
             } catch (DuplicateKeyException duplicate) {
                 // Duplicate event id or (device, seq): already applied, so this is success.
+                touchedDevices.add(eventDevice);
             }
         }
 
-        long hwm = contiguousHighWatermark(deviceId, rejectedSeq);
-        jdbc.update("UPDATE device SET hwm_seq = ?, last_seen = CURRENT_TIMESTAMP WHERE device_id = ?", hwm, deviceId);
-        audit.append(deviceId, "sync.push", "acked=" + hwm + " n=" + events.size());
+        // Acknowledge the lowest watermark across the devices this batch touched, so a
+        // client never prunes segments another device of the same learner still owes.
+        long acked = Long.MAX_VALUE;
+        Map<String, Object> perDevice = new LinkedHashMap<>();
+        for (String device : touchedDevices) {
+            Set<Long> rejectedForDevice = rejectedByDevice.getOrDefault(device, Set.of());
+            long hwm = contiguousHighWatermark(device, rejectedForDevice);
+            jdbc.update("UPDATE device SET hwm_seq = ?, last_seen = CURRENT_TIMESTAMP WHERE device_id = ?", hwm, device);
+            perDevice.put(device, hwm);
+            acked = Math.min(acked, hwm);
+        }
+        if (touchedDevices.isEmpty()) acked = 0;
+        audit.append(subject, "sync.push", "student=" + scopeStudent + " acked=" + acked + " n=" + events.size());
 
         return Map.of(
-                "acked_upto", hwm,
+                "acked_upto", acked,
+                "acked_by_device", perDevice,
                 "rejected", rejected,
                 "server_time", Instant.now().toString());
     }
 
-    public Map<String, Object> pull(String deviceId) {
-        List<Map<String, Object>> devices = jdbc.query(
-                "SELECT student_id FROM device WHERE device_id = ?",
-                (rs, row) -> Map.of("student_id", rs.getString(1)), deviceId);
-        if (devices.isEmpty()) throw new ApiException(403, "device_not_enrolled");
-        String studentId = String.valueOf(devices.get(0).get("student_id"));
+    public Map<String, Object> pull(String subject, String role) {
+        String studentId = scope.forActor(subject, role);
 
         JsonNode latest = packs.latest();
         List<Map<String, Object>> packList = new ArrayList<>();
@@ -269,10 +321,14 @@ public class SyncService {
         return hwm;
     }
 
-    private void reject(String deviceId, List<Map<String, String>> rejected, Set<Long> seqs, String eventId, long seq, String code) {
+    private void reject(String deviceId, List<Map<String, String>> rejected, Map<String, Set<Long>> byDevice,
+                        String eventId, long seq, String code) {
         rejected.add(Map.of("event_id", eventId == null ? "" : eventId, "code", code));
         if (seq <= 0) return;
-        seqs.add(seq);
+        if (deviceId != null && !deviceId.isBlank()) {
+            byDevice.computeIfAbsent(deviceId, key -> new LinkedHashSet<>()).add(seq);
+        }
+        if (deviceId == null || deviceId.isBlank()) return;
         try {
             jdbc.update(
                     "INSERT INTO rejected_event (device_id, seq, event_id, code) VALUES (?,?,?,?)",
